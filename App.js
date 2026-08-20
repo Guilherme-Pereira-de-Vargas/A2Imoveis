@@ -4,6 +4,10 @@ import { createStackNavigator } from "@react-navigation/stack";
 
 import Inicial from './Telas/Inicial';
 import Cadastro from './Telas/Cadastro';
+import Login from './Telas/Login';
+import Imoveis from './Telas/Imoveis';
+import SolicitarAnuncio from './Telas/SolicitarAnuncio';
+import DetalhesImovel from './Telas/DetalhesImovel';
 
 export default function App() {
 
@@ -17,6 +21,10 @@ export default function App() {
       }}>
         <Stack.Screen name="Inicial" component={Inicial}/>
         <Stack.Screen name="Cadastro" component={Cadastro}/>
+        <Stack.Screen name="Login" component={Login}/>
+        <Stack.Screen name="Imoveis" component={Imoveis}/>
+        <Stack.Screen name="SolicitarAnuncio" component={SolicitarAnuncio}/>
+        <Stack.Screen name="DetalhesImovel" component={DetalhesImovel}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
