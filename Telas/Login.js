@@ -91,12 +91,13 @@ export default function Login({ navigation }) {
       if (dadosUsuario?.tipo === 'admin') {
 
         navigation.navigate(
-          'AdminDashboard',
+          'InicialAdm',
           {
             adminEmail: usuario.email
           }
         );
-
+      } else if (dadosUsuario?.tipo === 'proprietario') {
+        navigation.navigate('ImoveisProprietario');
       } else {
 
         navigation.navigate('Imoveis');

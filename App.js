@@ -6,8 +6,11 @@ import Inicial from './Telas/Inicial';
 import Cadastro from './Telas/Cadastro';
 import Login from './Telas/Login';
 import Imoveis from './Telas/Imoveis';
+import ImoveisProprietario from './Telas/ImoveisProprietario';
 import SolicitarAnuncio from './Telas/SolicitarAnuncio';
 import DetalhesImovel from './Telas/DetalhesImovel';
+import CadastroAdm from './Telas/CadastroAdm';
+import InicialAdm from './Telas/InicialAdm';
 
 export default function App() {
 
@@ -23,8 +26,11 @@ export default function App() {
         <Stack.Screen name="Cadastro" component={Cadastro}/>
         <Stack.Screen name="Login" component={Login}/>
         <Stack.Screen name="Imoveis" component={Imoveis}/>
+        <Stack.Screen name="ImoveisProprietario" component={ImoveisProprietario}/>
         <Stack.Screen name="SolicitarAnuncio" component={SolicitarAnuncio}/>
         <Stack.Screen name="DetalhesImovel" component={DetalhesImovel}/>
+        <Stack.Screen name="CadastroAdm" component={CadastroAdm}/>
+        <Stack.Screen name="InicialAdm" component={InicialAdm}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

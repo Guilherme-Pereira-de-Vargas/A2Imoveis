@@ -1,4 +1,5 @@
 import { useState } from 'react';
+
 import {
   View,
   Text,
@@ -34,40 +35,9 @@ export default function CadastroAdm({ navigation }) {
   const auth = getAuth();
 
 
-  const mostrarErroAuth = (erro) => {
-
-    console.log('ERRO COMPLETO:', erro);
-    console.log('CÓDIGO DO ERRO:', erro?.code);
-
-    const mensagens = {
-
-      'auth/email-already-in-use':
-        'Esse e-mail já está sendo usado por outra conta.',
-
-      'auth/invalid-email':
-        'O e-mail informado parece inválido.',
-
-      'auth/weak-password':
-        'A senha precisa ter pelo menos 6 caracteres.',
-
-      'auth/network-request-failed':
-        'Falha de conexão. Verifique sua internet.',
-
-      'permission-denied':
-        'Sua conta foi criada, mas não foi possível salvar seus dados.',
-
-      'firestore/permission-denied':
-        'Sua conta foi criada, mas não foi possível salvar seus dados.',
-    };
-
-
-    Alert.alert(
-      'Não foi possível concluir',
-      mensagens[erro?.code] ||
-      'Ocorreu um erro. Tente novamente.'
-    );
-  };
-
+  // =====================================================
+  // CADASTRAR PROPRIETÁRIO
+  // =====================================================
 
   const cadastrar = async () => {
 
@@ -118,7 +88,9 @@ export default function CadastroAdm({ navigation }) {
 
     try {
 
-      // Cria usuário no Firebase Authentication
+      // =================================================
+      // CRIA CONTA NO FIREBASE AUTHENTICATION
+      // =================================================
 
       const credenciais =
         await createUserWithEmailAndPassword(
@@ -131,70 +103,77 @@ export default function CadastroAdm({ navigation }) {
       const usuario = credenciais.user;
 
 
-      // Salva os dados no Firestore
+      // =================================================
+      // SALVA OS DADOS NO FIRESTORE
+      // =================================================
 
-      try {
-
-        await setDoc(
-          doc(database, 'usuarios', usuario.uid),
-          {
-            uid: usuario.uid,
-            nome: nome.trim(),
-            email: usuario.email,
-            telefone: telefone.trim(),
-            tipo: 'proprietario',
-          }
-        );
-
-
-        // Tudo deu certo
-
-        Alert.alert(
-          'Cadastro realizado!',
-          'Sua conta foi criada com sucesso.',
-          [
-            {
-              text: 'Entrar',
-              onPress: () => {
-                navigation.navigate('Login');
-              },
-            },
-          ]
-        );
-
-      } catch (erroFirestore) {
-
-        console.log(
-          'ERRO AO SALVAR NO FIRESTORE:',
-          erroFirestore
-        );
-
-        // O usuário já foi criado no Authentication,
-        // mesmo que o Firestore tenha dado erro.
-
-        Alert.alert(
-          'Cadastro realizado!',
-          'Sua conta foi criada, mas alguns dados não puderam ser salvos.',
-          [
-            {
-              text: 'Entrar',
-              onPress: () => {
-                navigation.navigate('Login');
-              },
-            },
-          ]
-        );
-      }
-
-    } catch (erroAuth) {
-
-      console.log(
-        'ERRO NO AUTHENTICATION:',
-        erroAuth
+      await setDoc(
+        doc(database, 'usuarios', usuario.uid),
+        {
+          uid: usuario.uid,
+          nome: nome.trim(),
+          email: usuario.email,
+          telefone: telefone.trim(),
+          tipo: 'proprietario',
+        }
       );
 
-      mostrarErroAuth(erroAuth);
+
+      // =================================================
+      // LIMPA OS CAMPOS
+      // =================================================
+
+      setNome('');
+      setEmail('');
+      setTelefone('');
+      setSenha('');
+      setConfirmarSenha('');
+
+
+      // =================================================
+      // CADASTRO REALIZADO
+      // =================================================
+
+      Alert.alert(
+        'Sucesso',
+        'Proprietário cadastrado com sucesso!',
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+
+              // VOLTA PARA O MENU
+              navigation.navigate('InicialAdm');
+
+            },
+          },
+        ]
+      );
+
+
+    } catch (erro) {
+
+      // =================================================
+      // ERRO SOMENTE NO CONSOLE
+      // =================================================
+
+      console.log(
+        'ERRO AO CADASTRAR PROPRIETÁRIO:',
+        erro
+      );
+
+
+      // =================================================
+      // MENSAGEM SIMPLES PARA O USUÁRIO
+      // =================================================
+
+      Alert.alert(
+        'Erro',
+        'Não foi possível cadastrar o proprietário.'
+      );
+
     }
+
   };
 
 
@@ -206,7 +185,10 @@ export default function CadastroAdm({ navigation }) {
       resizeMode="cover"
     >
 
+      {/* ESCURECIMENTO */}
+
       <View style={estilos.overlay} />
+
 
       <ScrollView
         style={estilos.scroll}
@@ -214,7 +196,26 @@ export default function CadastroAdm({ navigation }) {
         showsVerticalScrollIndicator={false}
       >
 
-        {/* CABEÇALHO */}
+
+        {/* =================================================
+            BOTÃO VOLTAR
+        ================================================= */}
+
+        <TouchableOpacity
+                    style={estilos.botaoVoltar}
+                    onPress={() => navigation.goBack()}
+                  >
+        
+                    <Text style={estilos.iconeVoltar}>
+                      ‹
+                    </Text>
+        
+                  </TouchableOpacity>
+
+
+        {/* =================================================
+            CABEÇALHO
+        ================================================= */}
 
         <View style={estilos.cabecalho}>
 
@@ -222,22 +223,30 @@ export default function CadastroAdm({ navigation }) {
             ⌂
           </Text>
 
+
           <Text style={estilos.titulo}>
-            A2 <Text style={estilos.tituloClaro}>IMÓVEIS</Text>
+            A2{' '}
+            <Text style={estilos.tituloClaro}>
+              IMÓVEIS
+            </Text>
           </Text>
+
 
           <Text style={estilos.subtituloMarca}>
             REALIZANDO SONHOS
           </Text>
 
+
           <Text style={estilos.crie}>
-            Conta Do Proprietário
+            Conta do Proprietário
           </Text>
 
         </View>
 
 
-        {/* CARD */}
+        {/* =================================================
+            CARD
+        ================================================= */}
 
         <View style={estilos.card}>
 
@@ -249,6 +258,7 @@ export default function CadastroAdm({ navigation }) {
             <Text style={estilos.rotulo}>
               NOME COMPLETO
             </Text>
+
 
             <TextInput
               style={estilos.input}
@@ -268,6 +278,7 @@ export default function CadastroAdm({ navigation }) {
             <Text style={estilos.rotulo}>
               E-MAIL
             </Text>
+
 
             <TextInput
               style={estilos.input}
@@ -290,9 +301,10 @@ export default function CadastroAdm({ navigation }) {
               TELEFONE
             </Text>
 
+
             <TextInput
               style={estilos.input}
-              placeholder="Seu telefone"
+              placeholder="Telefone"
               placeholderTextColor="#888"
               value={telefone}
               onChangeText={setTelefone}
@@ -309,6 +321,7 @@ export default function CadastroAdm({ navigation }) {
             <Text style={estilos.rotulo}>
               SENHA
             </Text>
+
 
             <TextInput
               style={estilos.input}
@@ -330,6 +343,7 @@ export default function CadastroAdm({ navigation }) {
               CONFIRMAR SENHA
             </Text>
 
+
             <TextInput
               style={estilos.input}
               placeholder="Confirme sua senha"
@@ -342,10 +356,13 @@ export default function CadastroAdm({ navigation }) {
           </View>
 
 
-          {/* BOTÃO */}
+          {/* =================================================
+              BOTÃO
+          ================================================= */}
 
           <TouchableOpacity
             style={estilos.botao}
+            activeOpacity={0.8}
             onPress={cadastrar}
           >
 
@@ -358,25 +375,18 @@ export default function CadastroAdm({ navigation }) {
         </View>
 
 
-        {/* RODAPÉ */}
+        {/* =================================================
+            RODAPÉ
+        ================================================= */}
 
         <View style={estilos.rodape}>
 
           <Text style={estilos.textoRodape}>
-            Já tem uma conta?
+            Cadastro de proprietário
           </Text>
 
-          <TouchableOpacity
-            onPress={() => navigation.navigate('Login')}
-          >
-
-            <Text style={estilos.linkRodape}>
-              Entrar →
-            </Text>
-
-          </TouchableOpacity>
-
         </View>
+
 
       </ScrollView>
 
@@ -385,42 +395,78 @@ export default function CadastroAdm({ navigation }) {
 }
 
 
+/* =====================================================
+   ESTILOS
+===================================================== */
+
 const estilos = StyleSheet.create({
 
   fundo: {
     flex: 1,
   },
 
+
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0, 0, 0, 0.55)',
   },
 
+
   scroll: {
     flex: 1,
   },
+
 
   container: {
     flexGrow: 1,
     alignItems: 'center',
     padding: 25,
-    paddingTop: 45,
-    paddingBottom: 30,
+    paddingTop: 35,
+    paddingBottom: 35,
   },
 
 
-  // CABEÇALHO
+  /* =================================================
+     VOLTAR
+  ================================================= */
+
+  botaoVoltar: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: 'rgba(10,10,10,0.80)',
+    borderWidth: 1,
+    borderColor: 'rgba(201,168,106,0.35)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  iconeVoltar: {
+    color: '#C9A86A',
+    fontSize: 38,
+    lineHeight: 40,
+    marginTop: -5,
+  },
+
+  /* =================================================
+     CABEÇALHO
+  ================================================= */
 
   cabecalho: {
     alignItems: 'center',
     marginBottom: 25,
   },
 
+
   icone: {
     color: '#C9A86A',
     fontSize: 45,
     marginBottom: 5,
   },
+
 
   titulo: {
     color: '#C9A86A',
@@ -429,9 +475,11 @@ const estilos = StyleSheet.create({
     letterSpacing: 2,
   },
 
+
   tituloClaro: {
     color: '#fff',
   },
+
 
   subtituloMarca: {
     color: '#C9A86A',
@@ -441,6 +489,7 @@ const estilos = StyleSheet.create({
     marginTop: 5,
   },
 
+
   crie: {
     color: '#fff',
     fontSize: 24,
@@ -449,7 +498,9 @@ const estilos = StyleSheet.create({
   },
 
 
-  // CARD
+  /* =================================================
+     CARD
+  ================================================= */
 
   card: {
     width: '100%',
@@ -461,11 +512,14 @@ const estilos = StyleSheet.create({
   },
 
 
-  // CAMPOS
+  /* =================================================
+     CAMPOS
+  ================================================= */
 
   campo: {
     marginBottom: 16,
   },
+
 
   rotulo: {
     color: '#C9A86A',
@@ -474,6 +528,7 @@ const estilos = StyleSheet.create({
     marginBottom: 7,
     letterSpacing: 1,
   },
+
 
   input: {
     height: 50,
@@ -487,7 +542,9 @@ const estilos = StyleSheet.create({
   },
 
 
-  // BOTÃO
+  /* =================================================
+     BOTÃO
+  ================================================= */
 
   botao: {
     backgroundColor: '#C9A86A',
@@ -498,6 +555,7 @@ const estilos = StyleSheet.create({
     marginTop: 5,
   },
 
+
   textoBotao: {
     color: '#111',
     fontSize: 14,
@@ -506,24 +564,20 @@ const estilos = StyleSheet.create({
   },
 
 
-  // RODAPÉ
+  /* =================================================
+     RODAPÉ
+  ================================================= */
 
   rodape: {
-    flexDirection: 'row',
     marginTop: 22,
     marginBottom: 10,
+    alignItems: 'center',
   },
+
 
   textoRodape: {
-    color: '#ddd',
-    marginRight: 6,
-    fontSize: 14,
-  },
-
-  linkRodape: {
-    color: '#C9A86A',
-    fontWeight: 'bold',
-    fontSize: 14,
+    color: '#777',
+    fontSize: 12,
   },
 
 });

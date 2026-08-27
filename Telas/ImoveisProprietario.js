@@ -22,7 +22,7 @@ import {
 import { database } from '../firebaseConfig';
 
 
-export default function Imoveis({ navigation }) {
+export default function ImoveisProprietario({ navigation }) {
 
   const [imoveis, setImoveis] = useState([]);
   const [busca, setBusca] = useState('');
@@ -316,6 +316,47 @@ export default function Imoveis({ navigation }) {
           ))}
 
         </ScrollView>
+
+
+        {/* ================================================
+            ANUNCIAR IMÓVEL
+        ================================================= */}
+
+        <TouchableOpacity
+          style={estilos.botaoAnunciar}
+          activeOpacity={0.85}
+          onPress={() =>
+            navigation?.navigate('SolicitarAnuncio')
+          }
+        >
+
+          <View style={estilos.iconeAnunciarContainer}>
+
+            <Text style={estilos.iconeAnunciar}>
+              +
+            </Text>
+
+          </View>
+
+
+          <View style={estilos.textoAnunciarContainer}>
+
+            <Text style={estilos.tituloAnunciar}>
+              Quer anunciar seu imóvel?
+            </Text>
+
+            <Text style={estilos.subtituloAnunciar}>
+              Solicite um anúncio com a A2 Imóveis
+            </Text>
+
+          </View>
+
+
+          <Text style={estilos.seta}>
+            ›
+          </Text>
+
+        </TouchableOpacity>
 
 
         {/* ================================================
@@ -894,6 +935,64 @@ const estilos = StyleSheet.create({
 
   textoFiltroAtivo: {
     color: '#111',
+  },
+
+
+  /* ANUNCIAR */
+
+  botaoAnunciar: {
+    backgroundColor: 'rgba(201,168,106,0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(201,168,106,0.4)',
+    borderRadius: 16,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+
+
+  iconeAnunciarContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#C9A86A',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+
+  iconeAnunciar: {
+    color: '#111',
+    fontSize: 27,
+    fontWeight: '300',
+  },
+
+
+  textoAnunciarContainer: {
+    flex: 1,
+    marginLeft: 13,
+  },
+
+
+  tituloAnunciar: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+
+
+  subtituloAnunciar: {
+    color: '#999',
+    fontSize: 11,
+    marginTop: 4,
+  },
+
+
+  seta: {
+    color: '#C9A86A',
+    fontSize: 28,
+    marginLeft: 8,
   },
 
 
