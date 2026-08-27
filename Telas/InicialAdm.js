@@ -92,13 +92,13 @@ export default function InicialAdm({ navigation }) {
           <TouchableOpacity
             style={estilos.botao}
             activeOpacity={0.8}
-            onPress={() => abrirTela('Tela2')}
+            onPress={() => abrirTela('SolicitacoesAnuncio')}
           >
 
             <View style={estilos.iconeContainer}>
 
               <Text style={estilos.icone}>
-                👥
+                📢
               </Text>
 
             </View>
@@ -107,12 +107,11 @@ export default function InicialAdm({ navigation }) {
             <View style={estilos.textoContainer}>
 
               <Text style={estilos.tituloBotao}>
-                OPÇÃO 2
+                Conferir Solicitações
               </Text>
 
               <Text style={estilos.descricao}>
-                Veja e organize dados
-                de forma prática.
+                Confira as solicitações de anúncios pendentes.
               </Text>
 
             </View>

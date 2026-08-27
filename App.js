@@ -11,6 +11,8 @@ import SolicitarAnuncio from './Telas/SolicitarAnuncio';
 import DetalhesImovel from './Telas/DetalhesImovel';
 import CadastroAdm from './Telas/CadastroAdm';
 import InicialAdm from './Telas/InicialAdm';
+import SolicitacoesAnuncio from './Telas/SolicitacoesAnuncios';
+import Perfil from './Telas/Perfil';
 
 export default function App() {
 
@@ -31,6 +33,8 @@ export default function App() {
         <Stack.Screen name="DetalhesImovel" component={DetalhesImovel}/>
         <Stack.Screen name="CadastroAdm" component={CadastroAdm}/>
         <Stack.Screen name="InicialAdm" component={InicialAdm}/>
+        <Stack.Screen name="SolicitacoesAnuncio" component={SolicitacoesAnuncio}/>
+        <Stack.Screen name="Perfil" component={Perfil}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
