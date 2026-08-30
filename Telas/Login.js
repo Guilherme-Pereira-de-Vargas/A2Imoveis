@@ -14,6 +14,7 @@ import {
   getAuth,
   signInWithEmailAndPassword,
 } from 'firebase/auth';
+import { sendPasswordResetEmail } from 'firebase/auth';
 
 import {
   doc,
@@ -59,6 +60,31 @@ export default function Login({ navigation }) {
   };
 
 
+  const esqueciSenha = async () => {
+    if (!email.trim()) {
+      Alert.alert('Atenção', 'Informe seu e-mail para receber o link de redefinição.');
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, email.trim());
+      Alert.alert('Verifique seu e-mail', 'Enviamos um link para redefinir sua senha.');
+    } catch (err) {
+      console.log('ERRO AO ENVIAR RESET DE SENHA:', err);
+      const code = err?.code;
+      if (code === 'auth/user-not-found') {
+        Alert.alert('Usuário não encontrado', 'Não existe uma conta com esse e-mail.');
+        return;
+      }
+      if (code === 'auth/invalid-email') {
+        Alert.alert('E-mail inválido', 'Informe um e-mail válido.');
+        return;
+      }
+      Alert.alert('Erro', 'Não foi possível enviar o e-mail de redefinição.');
+    }
+  };
+
+
   const entrar = async () => {
 
     if (!email.trim() || !senha.trim()) {
@@ -88,7 +114,7 @@ export default function Login({ navigation }) {
 
       const dadosUsuario = snapUsuario.data();
 
-      if (dadosUsuario?.tipo === 'admin') {
+      if (dadosUsuario?.tipo === 'admin' || dadosUsuario?.tipo === 'dono') {
 
         navigation.navigate(
           'InicialAdm',
@@ -201,6 +227,10 @@ export default function Login({ navigation }) {
 
           {/* BOTÃO ENTRAR */}
 
+          <TouchableOpacity onPress={esqueciSenha} style={estilos.esqueciLink}>
+            <Text style={{ color: '#C9A86A', fontWeight: '700' }}>Esqueci a senha</Text>
+          </TouchableOpacity>
+
           <TouchableOpacity
             style={estilos.botaoEntrar}
             onPress={entrar}
@@ -238,20 +268,7 @@ export default function Login({ navigation }) {
         </View>
 
 
-        {/* ACESSO ADMINISTRATIVO */}
-
-        <TouchableOpacity
-          style={estilos.linkAdmin}
-          onPress={() =>
-            navigation?.navigate('AdminLogin')
-          }
-        >
-
-          <Text style={estilos.linkAdminTexto}>
-            Acesso administrativo
-          </Text>
-
-        </TouchableOpacity>
+        {/* Acesso administrativo removido do app */}
 
       </View>
 
@@ -377,7 +394,7 @@ const estilos = StyleSheet.create({
   linhaSenha: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 25,
+    marginBottom: 4,
     position: 'relative',
   },
 
@@ -391,7 +408,7 @@ const estilos = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingVertical: 8,
     paddingRight: 50,
   },
 
@@ -419,7 +436,7 @@ const estilos = StyleSheet.create({
     paddingVertical: 18,
     borderRadius: 50,
     alignItems: 'center',
-    marginTop: 3,
+    marginTop: 16,
   },
 
 
@@ -451,19 +468,14 @@ const estilos = StyleSheet.create({
     fontWeight: '700',
   },
 
+  esqueciLink: {
+    marginTop: 4,
+    alignSelf: 'flex-end',
+    paddingVertical: 0,
+  },
+
 
   /* ADMIN */
-
-  linkAdmin: {
-    marginTop: 20,
-  },
-
-
-  linkAdminTexto: {
-    color: '#C9A86A',
-    fontSize: 14,
-    fontWeight: '700',
-    letterSpacing: 1,
-  },
+  /* admin styles removed */
 
 });

@@ -10,7 +10,10 @@ import {
   ScrollView,
   Image,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
+import { useContext } from 'react';
+import { AuthContext } from '../contexts/AuthContext';
 
 import {
   collection,
@@ -23,6 +26,7 @@ import { database } from '../firebaseConfig';
 
 
 export default function Imoveis({ navigation }) {
+  const { isGuest } = useContext(AuthContext);
 
   const [imoveis, setImoveis] = useState([]);
   const [busca, setBusca] = useState('');
@@ -125,9 +129,7 @@ export default function Imoveis({ navigation }) {
 
 
     return correspondeBusca && correspondeFiltro;
-
   });
-
 
   // =====================================================
   // FORMATAR PREÇO
@@ -235,7 +237,6 @@ export default function Imoveis({ navigation }) {
           </TouchableOpacity>
 
         </View>
-
 
         {/* ================================================
             APRESENTAÇÃO
@@ -634,9 +635,13 @@ export default function Imoveis({ navigation }) {
 
           <TouchableOpacity
             style={estilos.servicoCard}
-            onPress={() =>
-              navigation?.navigate('AgendarVisita')
-            }
+            onPress={() => {
+              if (isGuest) {
+                Alert.alert('Atenção', 'Faça login para agendar uma visita.');
+                return;
+              }
+              navigation?.navigate('AgendarVisita');
+            }}
           >
 
             <View style={estilos.iconeServico}>
@@ -667,9 +672,13 @@ export default function Imoveis({ navigation }) {
 
           <TouchableOpacity
             style={estilos.servicoCard}
-            onPress={() =>
-              navigation?.navigate('Atendimento')
-            }
+            onPress={() => {
+              if (isGuest) {
+                Alert.alert('Atenção', 'Faça login para acessar este serviço.');
+                return;
+              }
+              navigation?.navigate('Atendimento');
+            }}
           >
 
             <View style={estilos.iconeServico}>
@@ -696,7 +705,6 @@ export default function Imoveis({ navigation }) {
           </TouchableOpacity>
 
         </View>
-
 
         {/* ================================================
             RODAPÉ

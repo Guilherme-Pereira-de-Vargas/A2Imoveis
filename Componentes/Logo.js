@@ -5,6 +5,7 @@ export default function Logo() {
     <Image
       source={require('../Imagens/logo-sem-fundo.png')}
       style={styles.logo}
+      resizeMode="contain"
     />
   );
 }
@@ -14,6 +15,5 @@ const styles = StyleSheet.create({
     width: 300,
     height: 300,
     marginTop: 40,
-    resizeMode: 'contain',
   },
 });

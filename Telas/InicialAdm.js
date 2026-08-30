@@ -193,6 +193,40 @@ export default function InicialAdm({ navigation }) {
 
           </TouchableOpacity>
 
+          <TouchableOpacity
+            style={estilos.botao}
+            activeOpacity={0.8}
+            onPress={() => abrirTela('Perfil')}
+          >
+
+            <View style={estilos.iconeContainer}>
+
+              <Text style={estilos.icone}>
+                👤
+              </Text>
+
+            </View>
+
+
+            <View style={estilos.textoContainer}>
+
+              <Text style={estilos.tituloBotao}>
+                Perfil
+              </Text>
+
+              <Text style={estilos.descricao}>
+                Visualizar perfil do usuário/admin
+              </Text>
+
+            </View>
+
+
+            <Text style={estilos.seta}>
+              ›
+            </Text>
+
+          </TouchableOpacity>
+
 
         </View>
 
@@ -330,8 +364,7 @@ const estilos = StyleSheet.create({
       width: 0,
       height: 5,
     },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
+    boxShadow: '0 8px 20px rgba(0,0,0,0.35)',
 
     elevation: 5,
   },

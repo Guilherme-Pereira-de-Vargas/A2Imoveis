@@ -1,395 +1,71 @@
 import { useState } from 'react';
 
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  ImageBackground,
-  Alert,
-  ScrollView,
-} from 'react-native';
-
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-} from 'firebase/auth';
-
-import {
-  doc,
-  setDoc,
-} from 'firebase/firestore';
-
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ImageBackground, Alert } from 'react-native';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { database } from '../firebaseConfig';
 
-
 export default function CadastroAdm({ navigation }) {
-
-  const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
-  const [telefone, setTelefone] = useState('');
-  const [senha, setSenha] = useState('');
-  const [confirmarSenha, setConfirmarSenha] = useState('');
+  const [buscando, setBuscando] = useState(false);
 
-  const auth = getAuth();
-
-
-  // =====================================================
-  // CADASTRAR PROPRIETÁRIO
-  // =====================================================
-
-  const cadastrar = async () => {
-
-    // Verifica campos vazios
-
-    if (
-      !nome.trim() ||
-      !email.trim() ||
-      !telefone.trim() ||
-      !senha.trim() ||
-      !confirmarSenha.trim()
-    ) {
-
-      Alert.alert(
-        'Atenção',
-        'Preencha todos os campos.'
-      );
-
+  const buscarUsuario = async () => {
+    if (!email.trim()) {
+      Alert.alert('Atenção', 'Digite o e-mail do usuário.');
       return;
     }
-
-
-    // Verifica tamanho da senha
-
-    if (senha.length < 6) {
-
-      Alert.alert(
-        'Atenção',
-        'A senha precisa ter pelo menos 6 caracteres.'
-      );
-
-      return;
-    }
-
-
-    // Verifica confirmação da senha
-
-    if (senha !== confirmarSenha) {
-
-      Alert.alert(
-        'Atenção',
-        'As senhas não coincidem.'
-      );
-
-      return;
-    }
-
 
     try {
+      setBuscando(true);
+      const usuariosRef = collection(database, 'usuarios');
+      const q = query(usuariosRef, where('email', '==', email.trim()));
+      const snap = await getDocs(q);
 
-      // =================================================
-      // CRIA CONTA NO FIREBASE AUTHENTICATION
-      // =================================================
+      if (snap.empty) {
+        Alert.alert('Não encontrado', 'Nenhum usuário foi encontrado com este e-mail.');
+        return;
+      }
 
-      const credenciais =
-        await createUserWithEmailAndPassword(
-          auth,
-          email.trim(),
-          senha
-        );
-
-
-      const usuario = credenciais.user;
-
-
-      // =================================================
-      // SALVA OS DADOS NO FIRESTORE
-      // =================================================
-
-      await setDoc(
-        doc(database, 'usuarios', usuario.uid),
-        {
-          uid: usuario.uid,
-          nome: nome.trim(),
-          email: usuario.email,
-          telefone: telefone.trim(),
-          tipo: 'proprietario',
-        }
-      );
-
-
-      // =================================================
-      // LIMPA OS CAMPOS
-      // =================================================
-
-      setNome('');
-      setEmail('');
-      setTelefone('');
-      setSenha('');
-      setConfirmarSenha('');
-
-
-      // =================================================
-      // CADASTRO REALIZADO
-      // =================================================
-
-      Alert.alert(
-        'Sucesso',
-        'Proprietário cadastrado com sucesso!',
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-
-              // VOLTA PARA O MENU
-              navigation.navigate('InicialAdm');
-
-            },
-          },
-        ]
-      );
-
+      const docu = snap.docs[0];
+      const data = docu.data();
+      navigation.navigate('DetalhesUsuario', { usuarioId: docu.id, dados: data });
 
     } catch (erro) {
-
-      // =================================================
-      // ERRO SOMENTE NO CONSOLE
-      // =================================================
-
-      console.log(
-        'ERRO AO CADASTRAR PROPRIETÁRIO:',
-        erro
-      );
-
-
-      // =================================================
-      // MENSAGEM SIMPLES PARA O USUÁRIO
-      // =================================================
-
-      Alert.alert(
-        'Erro',
-        'Não foi possível cadastrar o proprietário.'
-      );
-
+      console.log('ERRO AO BUSCAR USUÁRIO:', erro);
+      Alert.alert('Erro', 'Não foi possível buscar o usuário.');
+    } finally {
+      setBuscando(false);
     }
-
   };
 
-
   return (
-
-    <ImageBackground
-      source={require('../Imagens/fundo-cadastro.png')}
-      style={estilos.fundo}
-      resizeMode="cover"
-    >
-
-      {/* ESCURECIMENTO */}
-
+    <ImageBackground source={require('../Imagens/fundo-cadastro.png')} style={estilos.fundo} resizeMode="cover">
       <View style={estilos.overlay} />
-
-
-      <ScrollView
-        style={estilos.scroll}
-        contentContainerStyle={estilos.container}
-        showsVerticalScrollIndicator={false}
-      >
-
-
-        {/* =================================================
-            BOTÃO VOLTAR
-        ================================================= */}
-
-        <TouchableOpacity
-                    style={estilos.botaoVoltar}
-                    onPress={() => navigation.goBack()}
-                  >
-        
-                    <Text style={estilos.iconeVoltar}>
-                      ‹
-                    </Text>
-        
-                  </TouchableOpacity>
-
-
-        {/* =================================================
-            CABEÇALHO
-        ================================================= */}
-
-        <View style={estilos.cabecalho}>
-
-          <Text style={estilos.icone}>
-            ⌂
-          </Text>
-
-
-          <Text style={estilos.titulo}>
-            A2{' '}
-            <Text style={estilos.tituloClaro}>
-              IMÓVEIS
-            </Text>
-          </Text>
-
-
-          <Text style={estilos.subtituloMarca}>
-            REALIZANDO SONHOS
-          </Text>
-
-
-          <Text style={estilos.crie}>
-            Conta do Proprietário
-          </Text>
-
-        </View>
-
-
-        {/* =================================================
-            CARD
-        ================================================= */}
+      <View style={estilos.container}>
+        <TouchableOpacity style={estilos.botaoVoltar} onPress={() => navigation.goBack()}>
+          <Text style={estilos.iconeVoltar}>‹</Text>
+        </TouchableOpacity>
 
         <View style={estilos.card}>
-
-
-          {/* NOME */}
-
-          <View style={estilos.campo}>
-
-            <Text style={estilos.rotulo}>
-              NOME COMPLETO
-            </Text>
-
-
-            <TextInput
-              style={estilos.input}
-              placeholder="Nome do Proprietário"
-              placeholderTextColor="#888"
-              value={nome}
-              onChangeText={setNome}
-            />
-
-          </View>
-
-
-          {/* EMAIL */}
-
-          <View style={estilos.campo}>
-
-            <Text style={estilos.rotulo}>
-              E-MAIL
-            </Text>
-
-
-            <TextInput
-              style={estilos.input}
-              placeholder="Email do Proprietário"
-              placeholderTextColor="#888"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-
-          </View>
-
-
-          {/* TELEFONE */}
-
-          <View style={estilos.campo}>
-
-            <Text style={estilos.rotulo}>
-              TELEFONE
-            </Text>
-
-
-            <TextInput
-              style={estilos.input}
-              placeholder="Telefone"
-              placeholderTextColor="#888"
-              value={telefone}
-              onChangeText={setTelefone}
-              keyboardType="phone-pad"
-            />
-
-          </View>
-
-
-          {/* SENHA */}
-
-          <View style={estilos.campo}>
-
-            <Text style={estilos.rotulo}>
-              SENHA
-            </Text>
-
-
-            <TextInput
-              style={estilos.input}
-              placeholder="Digite sua senha"
-              placeholderTextColor="#888"
-              value={senha}
-              onChangeText={setSenha}
-              secureTextEntry
-            />
-
-          </View>
-
-
-          {/* CONFIRMAR SENHA */}
-
-          <View style={estilos.campo}>
-
-            <Text style={estilos.rotulo}>
-              CONFIRMAR SENHA
-            </Text>
-
-
-            <TextInput
-              style={estilos.input}
-              placeholder="Confirme sua senha"
-              placeholderTextColor="#888"
-              value={confirmarSenha}
-              onChangeText={setConfirmarSenha}
-              secureTextEntry
-            />
-
-          </View>
-
-
-          {/* =================================================
-              BOTÃO
-          ================================================= */}
+          <Text style={estilos.rotulo}>E-MAIL DO USUÁRIO</Text>
+          <TextInput
+            style={estilos.input}
+            placeholder="Email do usuário"
+            placeholderTextColor="#888"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
 
           <TouchableOpacity
-            style={estilos.botao}
-            activeOpacity={0.8}
-            onPress={cadastrar}
+            style={[estilos.botao, estilos.botaoEntrar, { marginTop: 14, alignSelf: 'center' }]}
+            onPress={buscarUsuario}
+            accessibilityLabel={buscando ? 'Buscando' : 'Buscar'}
           >
-
-            <Text style={estilos.textoBotao}>
-              CRIAR CONTA
-            </Text>
-
+            <Text style={estilos.textoBotaoEntrar}>{buscando ? 'Buscando...' : 'Buscar'}</Text>
           </TouchableOpacity>
-
         </View>
-
-
-        {/* =================================================
-            RODAPÉ
-        ================================================= */}
-
-        <View style={estilos.rodape}>
-
-          <Text style={estilos.textoRodape}>
-            Cadastro de proprietário
-          </Text>
-
-        </View>
-
-
-      </ScrollView>
-
+      </View>
     </ImageBackground>
   );
 }
@@ -418,11 +94,10 @@ const estilos = StyleSheet.create({
 
 
   container: {
-    flexGrow: 1,
+    flex: 1,
     alignItems: 'center',
-    padding: 25,
-    paddingTop: 35,
-    paddingBottom: 35,
+    justifyContent: 'center',
+    padding: 24,
   },
 
 
@@ -503,7 +178,7 @@ const estilos = StyleSheet.create({
   ================================================= */
 
   card: {
-    width: '100%',
+    width: '92%',
     backgroundColor: 'rgba(15, 15, 15, 0.93)',
     borderRadius: 18,
     padding: 20,
@@ -547,20 +222,25 @@ const estilos = StyleSheet.create({
   ================================================= */
 
   botao: {
-    backgroundColor: '#C9A86A',
-    height: 52,
-    borderRadius: 28,
+    width: '60%',
+    paddingVertical: 12,
+    borderRadius: 25,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 5,
   },
 
+  botaoEntrar: {
+    backgroundColor: '#C9A86A',
+  },
 
-  textoBotao: {
-    color: '#111',
-    fontSize: 14,
-    fontWeight: 'bold',
-    letterSpacing: 1,
+  textoBotaoEntrar: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+
+  botaoDesabilitado: {
+    opacity: 0.7,
   },
 
 

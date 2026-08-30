@@ -1,6 +1,7 @@
 import 'react-native-gesture-handler';
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
+import { AuthProvider } from './contexts/AuthContext';
 
 import Inicial from './Telas/Inicial';
 import Cadastro from './Telas/Cadastro';
@@ -9,16 +10,19 @@ import Imoveis from './Telas/Imoveis';
 import ImoveisProprietario from './Telas/ImoveisProprietario';
 import SolicitarAnuncio from './Telas/SolicitarAnuncio';
 import DetalhesImovel from './Telas/DetalhesImovel';
+// Admin screens removed from navigator
+import SolicitacoesAnuncio from './Telas/SolicitacoesAnuncios';
 import CadastroAdm from './Telas/CadastroAdm';
 import InicialAdm from './Telas/InicialAdm';
-import SolicitacoesAnuncio from './Telas/SolicitacoesAnuncios';
+import DetalhesUsuario from './Telas/DetalhesUsuario';
 import Perfil from './Telas/Perfil';
 
 export default function App() {
 
   const Stack = createStackNavigator();
   return (
-    <NavigationContainer>
+    <AuthProvider>
+      <NavigationContainer>
       <Stack.Navigator 
       initialRouteName="Inicial"
       screenOptions={{
@@ -33,9 +37,11 @@ export default function App() {
         <Stack.Screen name="DetalhesImovel" component={DetalhesImovel}/>
         <Stack.Screen name="CadastroAdm" component={CadastroAdm}/>
         <Stack.Screen name="InicialAdm" component={InicialAdm}/>
+        <Stack.Screen name="DetalhesUsuario" component={DetalhesUsuario}/>
         <Stack.Screen name="SolicitacoesAnuncio" component={SolicitacoesAnuncio}/>
         <Stack.Screen name="Perfil" component={Perfil}/>
       </Stack.Navigator>
     </NavigationContainer>
+    </AuthProvider>
   );
 }

@@ -1,7 +1,10 @@
 import { StyleSheet, View, ImageBackground, TouchableOpacity, Text } from 'react-native';
+import { useContext } from 'react';
+import { AuthContext } from '../contexts/AuthContext';
 import Logo from '../Componentes/Logo';
 
 export default function Inicial({ navigation }) {
+  const { continueAsGuest } = useContext(AuthContext);
   return (
     <View style={estilos.container}>
       <ImageBackground
@@ -25,6 +28,17 @@ export default function Inicial({ navigation }) {
           onPress={() => navigation.navigate('Cadastro')}
         >
           <Text style={estilos.textoBotaoCadastrar}>Cadastrar</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          hitSlop={{ top: 10, bottom: 10 }}
+          style={[estilos.botao, { backgroundColor: 'transparent', marginTop: 18 }]}
+          onPress={() => {
+            continueAsGuest();
+            navigation.navigate('Imoveis');
+          }}
+        >
+          <Text style={[estilos.textoBotaoCadastrar, { color: '#C9A86A' }]}>Continuar como visitante</Text>
         </TouchableOpacity>
       </ImageBackground>
     </View>
