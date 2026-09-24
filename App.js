@@ -10,7 +10,6 @@ import Imoveis from './Telas/Imoveis';
 import ImoveisProprietario from './Telas/ImoveisProprietario';
 import SolicitarAnuncio from './Telas/SolicitarAnuncio';
 import DetalhesImovel from './Telas/DetalhesImovel';
-// Admin screens removed from navigator
 import SolicitacoesAnuncio from './Telas/SolicitacoesAnuncios';
 import CadastroAdm from './Telas/CadastroAdm';
 import InicialAdm from './Telas/InicialAdm';
