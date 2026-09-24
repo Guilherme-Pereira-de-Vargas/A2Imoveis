@@ -163,20 +163,39 @@ export default function Imoveis({ navigation }) {
 
   const pegarImagem = (imovel) => {
 
-    if (imovel.imagem) {
-      return { uri: imovel.imagem };
-    }
+  // Novo formato: fotos vindas do Cloudinary
+  if (
+    imovel.fotos &&
+    Array.isArray(imovel.fotos) &&
+    imovel.fotos.length > 0
+  ) {
+    return {
+      uri: imovel.fotos[0],
+    };
+  }
 
-    if (
-      imovel.imagens &&
-      Array.isArray(imovel.imagens) &&
-      imovel.imagens.length > 0
-    ) {
-      return { uri: imovel.imagens[0] };
-    }
 
-    return null;
-  };
+  // Compatibilidade com imóveis antigos
+  if (imovel.imagem) {
+    return {
+      uri: imovel.imagem,
+    };
+  }
+
+
+  if (
+    imovel.imagens &&
+    Array.isArray(imovel.imagens) &&
+    imovel.imagens.length > 0
+  ) {
+    return {
+      uri: imovel.imagens[0],
+    };
+  }
+
+
+  return null;
+};
 
 
   return (
