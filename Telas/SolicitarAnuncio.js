@@ -57,7 +57,7 @@ export default function SolicitarAnuncio({ navigation }) {
 
 
   // =====================================================
-  // SELECIONAR FOTO DO COMPROVANTE
+  // SELECIONAR COMPROVANTE
   // =====================================================
 
   const selecionarComprovante = async () => {
@@ -82,7 +82,7 @@ export default function SolicitarAnuncio({ navigation }) {
       const resultado =
         await ImagePicker.launchImageLibraryAsync({
 
-          mediaTypes: 'images',
+          mediaTypes: ['images'],
 
           allowsMultipleSelection: false,
 
@@ -142,15 +142,11 @@ export default function SolicitarAnuncio({ navigation }) {
 
 
       const resultado =
-        await ImagePicker.launchImageLibraryAsync({
-
-          mediaTypes: 'images',
-
-          allowsMultipleSelection: true,
-
-          quality: 0.8,
-
-        });
+  await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ['images'],
+    allowsMultipleSelection: true,
+    quality: 0.8,
+  });
 
 
       if (resultado.canceled) {
@@ -290,6 +286,10 @@ export default function SolicitarAnuncio({ navigation }) {
           `Enviando foto ${i + 1} de ${fotos.length}...`
         );
 
+        console.log(
+          'Preparando imagem...'
+        );
+
 
         const url =
           await uploadImagem(
@@ -313,11 +313,15 @@ export default function SolicitarAnuncio({ navigation }) {
 
 
       // -------------------------------------------------
-      // ENVIAR FOTO DO COMPROVANTE
+      // ENVIAR COMPROVANTE
       // -------------------------------------------------
 
       console.log(
         'Enviando comprovante...'
+      );
+
+      console.log(
+        'Preparando comprovante...'
       );
 
 
@@ -337,9 +341,19 @@ export default function SolicitarAnuncio({ navigation }) {
       // SALVAR NO FIRESTORE
       // -------------------------------------------------
 
+      console.log(
+        'Salvando solicitação no Firestore...'
+      );
+
+
       await setDoc(
         referenciaSolicitacao,
         {
+
+          // ID
+          id:
+            idSolicitacao,
+
 
           // DADOS DO IMÓVEL
 
@@ -385,10 +399,13 @@ export default function SolicitarAnuncio({ navigation }) {
               : null,
 
 
-          // VALOR E DESCRIÇÃO
+          // VALOR
 
           preco:
             preco.trim(),
+
+
+          // DESCRIÇÃO
 
           descricao:
             descricao.trim(),
@@ -409,13 +426,13 @@ export default function SolicitarAnuncio({ navigation }) {
             usuario.email || '',
 
 
-          // FOTOS DO IMÓVEL
+          // FOTOS
 
           fotos:
             urlsFotos,
 
 
-          // FOTO DO COMPROVANTE
+          // COMPROVANTE
 
           comprovanteResidencia:
             comprovanteUrl,
@@ -439,6 +456,11 @@ export default function SolicitarAnuncio({ navigation }) {
       );
 
 
+      console.log(
+        'SOLICITAÇÃO SALVA COM SUCESSO!'
+      );
+
+
       // -------------------------------------------------
       // SUCESSO
       // -------------------------------------------------
@@ -459,15 +481,31 @@ export default function SolicitarAnuncio({ navigation }) {
 
     } catch (erro) {
 
+      // -------------------------------------------------
+      // ERRO
+      // -------------------------------------------------
+
       console.log(
         'ERRO AO ENVIAR SOLICITAÇÃO:',
         erro
       );
 
 
+      let mensagem =
+        'Não foi possível enviar a solicitação.';
+
+
+      if (erro && erro.message) {
+
+        mensagem =
+          erro.message;
+
+      }
+
+
       Alert.alert(
         'Erro',
-        'Não foi possível enviar a solicitação. Verifique sua conexão e tente novamente.'
+        mensagem
       );
 
 
@@ -828,7 +866,7 @@ export default function SolicitarAnuncio({ navigation }) {
           {/* COMPROVANTE */}
 
           <Text style={estilos.label}>
-            FOTO DO COMPROVANTE DE RESIDÊNCIA *
+            COMPROVANTE DE RESIDÊNCIA *
           </Text>
 
 
@@ -849,7 +887,7 @@ export default function SolicitarAnuncio({ navigation }) {
 
                 {comprovante
                   ? 'Comprovante selecionado'
-                  : 'Selecionar foto do comprovante'}
+                  : 'Selecionar comprovante'}
 
               </Text>
 
@@ -858,7 +896,7 @@ export default function SolicitarAnuncio({ navigation }) {
 
                 {comprovante
                   ? 'Imagem selecionada'
-                  : 'JPG ou PNG'}
+                  : 'Selecione uma foto do comprovante'}
 
               </Text>
 
@@ -916,7 +954,7 @@ export default function SolicitarAnuncio({ navigation }) {
 
 
           <Text style={estilos.avisoDocumentos}>
-            O comprovante deve ser enviado como uma foto. As fotos do imóvel serão enviadas individualmente.
+            O comprovante deve ser enviado como imagem. As fotos serão enviadas individualmente.
           </Text>
 
         </View>
