@@ -20,6 +20,7 @@ import {
   doc,
   updateDoc,
   setDoc,
+  deleteDoc,
 } from 'firebase/firestore';
 
 import { getAuth } from 'firebase/auth';
@@ -37,11 +38,9 @@ export default function SolicitacoesAnuncios({ navigation }) {
   const [processando, setProcessando] =
     useState(null);
 
-  // Filtro começa mostrando somente pendentes
   const [filtro, setFiltro] =
     useState('pendente');
 
-  // Busca pelo proprietário
   const [buscaProprietario, setBuscaProprietario] =
     useState('');
 
@@ -56,12 +55,10 @@ export default function SolicitacoesAnuncios({ navigation }) {
 
       setCarregando(true);
 
-
       const auth = getAuth();
 
       const usuario =
         auth.currentUser;
-
 
       if (!usuario) {
 
@@ -92,7 +89,6 @@ export default function SolicitacoesAnuncios({ navigation }) {
         );
 
 
-      // Mais recentes primeiro
       lista.sort((a, b) => {
 
         const dataA =
@@ -104,6 +100,7 @@ export default function SolicitacoesAnuncios({ navigation }) {
           new Date(0);
 
         return dataB - dataA;
+
       });
 
 
@@ -128,6 +125,7 @@ export default function SolicitacoesAnuncios({ navigation }) {
       setCarregando(false);
 
     }
+
   };
 
 
@@ -139,7 +137,7 @@ export default function SolicitacoesAnuncios({ navigation }) {
 
 
   // =====================================================
-  // ABRIR LINK
+  // ABRIR ARQUIVO
   // =====================================================
 
   const abrirArquivo = async (url) => {
@@ -170,7 +168,9 @@ export default function SolicitacoesAnuncios({ navigation }) {
         'Erro',
         'Não foi possível abrir o arquivo.'
       );
+
     }
+
   };
 
 
@@ -200,7 +200,9 @@ export default function SolicitacoesAnuncios({ navigation }) {
         'Erro',
         'Não foi possível abrir a imagem.'
       );
+
     }
+
   };
 
 
@@ -222,7 +224,9 @@ export default function SolicitacoesAnuncios({ navigation }) {
 
 
     const numero =
-      solicitacao.telefone.replace(
+      String(
+        solicitacao.telefone
+      ).replace(
         /\D/g,
         ''
       );
@@ -242,12 +246,14 @@ export default function SolicitacoesAnuncios({ navigation }) {
         'Erro',
         'Não foi possível abrir o WhatsApp.'
       );
+
     }
+
   };
 
 
   // =====================================================
-  // CONFIRMAR APROVAÇÃO
+  // APROVAR - CONFIRMAÇÃO
   // =====================================================
 
   const aprovarAnuncio = (solicitacao) => {
@@ -255,7 +261,7 @@ export default function SolicitacoesAnuncios({ navigation }) {
     Alert.alert(
       'Aprovar anúncio',
 
-      `Deseja aprovar o imóvel "${solicitacao.titulo}"?`,
+      `Deseja aprovar o imóvel "${solicitacao.titulo || 'Imóvel sem título'}"?`,
 
       [
         {
@@ -273,6 +279,7 @@ export default function SolicitacoesAnuncios({ navigation }) {
         },
       ]
     );
+
   };
 
 
@@ -291,9 +298,9 @@ export default function SolicitacoesAnuncios({ navigation }) {
       );
 
 
-      // -----------------------------------------------
+      // =================================================
       // CRIAR IMÓVEL
-      // -----------------------------------------------
+      // =================================================
 
       const referenciaImovel =
         doc(
@@ -325,23 +332,25 @@ export default function SolicitacoesAnuncios({ navigation }) {
           endereco:
             solicitacao.endereco || '',
 
-
           quartos:
-            solicitacao.quartos ??
-            null,
+            solicitacao.quartos != null
+              ? solicitacao.quartos
+              : null,
 
           banheiros:
-            solicitacao.banheiros ??
-            null,
+            solicitacao.banheiros != null
+              ? solicitacao.banheiros
+              : null,
 
           vagas:
-            solicitacao.vagas ??
-            null,
+            solicitacao.vagas != null
+              ? solicitacao.vagas
+              : null,
 
           area:
-            solicitacao.area ??
-            null,
-
+            solicitacao.area != null
+              ? solicitacao.area
+              : null,
 
           preco:
             solicitacao.preco || '',
@@ -350,30 +359,22 @@ export default function SolicitacoesAnuncios({ navigation }) {
             solicitacao.descricao || '',
 
 
-          // -------------------------------------------
           // PROPRIETÁRIO
-          // -------------------------------------------
 
           proprietarioId:
-            solicitacao.proprietarioId ||
-            '',
+            solicitacao.proprietarioId || '',
 
           proprietarioEmail:
-            solicitacao.proprietarioEmail ||
-            '',
+            solicitacao.proprietarioEmail || '',
 
           proprietarioNome:
-            solicitacao.proprietarioNome ||
-            '',
+            solicitacao.proprietarioNome || '',
 
           telefone:
-            solicitacao.telefone ||
-            '',
+            solicitacao.telefone || '',
 
 
-          // -------------------------------------------
-          // FOTOS DO CLOUDINARY
-          // -------------------------------------------
+          // FOTOS
 
           fotos:
             Array.isArray(
@@ -383,18 +384,13 @@ export default function SolicitacoesAnuncios({ navigation }) {
               : [],
 
 
-          // -------------------------------------------
-          // COMPROVANTE DO CLOUDINARY
-          // -------------------------------------------
+          // COMPROVANTE
 
           comprovanteResidencia:
-            solicitacao.comprovanteResidencia ||
-            '',
+            solicitacao.comprovanteResidencia || '',
 
 
-          // -------------------------------------------
           // STATUS
-          // -------------------------------------------
 
           publicado:
             true,
@@ -409,9 +405,9 @@ export default function SolicitacoesAnuncios({ navigation }) {
       );
 
 
-      // -----------------------------------------------
+      // =================================================
       // ATUALIZAR SOLICITAÇÃO
-      // -----------------------------------------------
+      // =================================================
 
       await updateDoc(
         doc(
@@ -434,9 +430,9 @@ export default function SolicitacoesAnuncios({ navigation }) {
       );
 
 
-      // -----------------------------------------------
+      // =================================================
       // ATUALIZAR TELA
-      // -----------------------------------------------
+      // =================================================
 
       setSolicitacoes(
         (lista) =>
@@ -444,8 +440,7 @@ export default function SolicitacoesAnuncios({ navigation }) {
           lista.map(
             (item) =>
 
-              item.id ===
-              solicitacao.id
+              item.id === solicitacao.id
 
                 ? {
                     ...item,
@@ -467,7 +462,6 @@ export default function SolicitacoesAnuncios({ navigation }) {
 
       Alert.alert(
         'Anúncio aprovado! 🏠',
-
         'O imóvel foi publicado com sucesso.'
       );
 
@@ -478,7 +472,6 @@ export default function SolicitacoesAnuncios({ navigation }) {
         'ERRO AO APROVAR:',
         erro
       );
-
 
       Alert.alert(
         'Erro',
@@ -491,11 +484,12 @@ export default function SolicitacoesAnuncios({ navigation }) {
       setProcessando(null);
 
     }
+
   };
 
 
   // =====================================================
-  // RECUSAR ANÚNCIO
+  // RECUSAR - CONFIRMAÇÃO
   // =====================================================
 
   const recusarAnuncio = (
@@ -505,7 +499,7 @@ export default function SolicitacoesAnuncios({ navigation }) {
     Alert.alert(
       'Recusar anúncio',
 
-      `Deseja recusar o imóvel "${solicitacao.titulo}"?`,
+      `Deseja recusar o imóvel "${solicitacao.titulo || 'Imóvel sem título'}"?`,
 
       [
         {
@@ -525,11 +519,12 @@ export default function SolicitacoesAnuncios({ navigation }) {
         },
       ]
     );
+
   };
 
 
   // =====================================================
-  // CONFIRMAR RECUSA
+  // RECUSAR
   // =====================================================
 
   const confirmarRecusa = async (
@@ -587,7 +582,6 @@ export default function SolicitacoesAnuncios({ navigation }) {
 
       Alert.alert(
         'Anúncio recusado',
-
         'A solicitação foi marcada como recusada.'
       );
 
@@ -598,7 +592,6 @@ export default function SolicitacoesAnuncios({ navigation }) {
         'ERRO AO RECUSAR:',
         erro
       );
-
 
       Alert.alert(
         'Erro',
@@ -611,6 +604,287 @@ export default function SolicitacoesAnuncios({ navigation }) {
       setProcessando(null);
 
     }
+
+  };
+
+
+  // =====================================================
+  // ALTERAR DECISÃO - CONFIRMAÇÃO
+  // =====================================================
+
+  const alterarDecisao = (
+    solicitacao
+  ) => {
+
+    Alert.alert(
+      'Alterar decisão',
+
+      `Deseja voltar a solicitação "${solicitacao.titulo || 'Imóvel sem título'}" para pendente?`,
+
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+
+        {
+          text: 'Alterar',
+
+          onPress: () =>
+            confirmarAlteracaoDecisao(
+              solicitacao
+            ),
+        },
+      ]
+    );
+
+  };
+
+
+  // =====================================================
+  // ALTERAR DECISÃO
+  // =====================================================
+
+  const confirmarAlteracaoDecisao =
+    async (solicitacao) => {
+
+      try {
+
+        setProcessando(
+          solicitacao.id
+        );
+
+
+        // Se estava aprovado,
+        // remove o imóvel publicado.
+
+        if (
+          solicitacao.status ===
+            'aprovado' ||
+          solicitacao.imovelId
+        ) {
+
+          const idImovel =
+            solicitacao.imovelId ||
+            solicitacao.id;
+
+
+          await deleteDoc(
+            doc(
+              database,
+              'imoveis',
+              idImovel
+            )
+          );
+
+        }
+
+
+        // Volta a solicitação
+        // para pendente.
+
+        await updateDoc(
+          doc(
+            database,
+            'solicitacoes_anuncios',
+            solicitacao.id
+          ),
+          {
+
+            status:
+              'pendente',
+
+            publicado:
+              false,
+
+            imovelId:
+              '',
+
+          }
+        );
+
+
+        // Atualizar tela
+
+        setSolicitacoes(
+          (lista) =>
+
+            lista.map(
+              (item) =>
+
+                item.id ===
+                solicitacao.id
+
+                  ? {
+                      ...item,
+
+                      status:
+                        'pendente',
+
+                      publicado:
+                        false,
+
+                      imovelId:
+                        '',
+                    }
+
+                  : item
+            )
+        );
+
+
+        Alert.alert(
+          'Decisão alterada',
+          'A solicitação voltou para pendente e pode ser analisada novamente.'
+        );
+
+
+      } catch (erro) {
+
+        console.log(
+          'ERRO AO ALTERAR DECISÃO:',
+          erro
+        );
+
+        Alert.alert(
+          'Erro',
+          'Não foi possível alterar a decisão.'
+        );
+
+
+      } finally {
+
+        setProcessando(null);
+
+      }
+
+    };
+
+
+  // =====================================================
+  // EXCLUIR - CONFIRMAÇÃO
+  // =====================================================
+
+  const excluirSolicitacao = (
+    solicitacao
+  ) => {
+
+    Alert.alert(
+      'Excluir solicitação',
+
+      `Tem certeza que deseja excluir a solicitação "${solicitacao.titulo || 'Imóvel sem título'}"?\n\nEssa ação não poderá ser desfeita.`,
+
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+
+        {
+          text: 'Excluir',
+
+          style: 'destructive',
+
+          onPress: () =>
+            confirmarExclusao(
+              solicitacao
+            ),
+        },
+      ]
+    );
+
+  };
+
+
+  // =====================================================
+  // EXCLUIR SOLICITAÇÃO
+  // =====================================================
+
+  const confirmarExclusao = async (
+    solicitacao
+  ) => {
+
+    try {
+
+      setProcessando(
+        solicitacao.id
+      );
+
+
+      // Se a solicitação foi aprovada,
+      // exclui também o imóvel.
+
+      if (
+        solicitacao.status ===
+          'aprovado' ||
+        solicitacao.imovelId
+      ) {
+
+        const idImovel =
+          solicitacao.imovelId ||
+          solicitacao.id;
+
+
+        await deleteDoc(
+          doc(
+            database,
+            'imoveis',
+            idImovel
+          )
+        );
+
+      }
+
+
+      // Exclui a solicitação
+
+      await deleteDoc(
+        doc(
+          database,
+          'solicitacoes_anuncios',
+          solicitacao.id
+        )
+      );
+
+
+      // Remove da tela
+
+      setSolicitacoes(
+        (lista) =>
+
+          lista.filter(
+            (item) =>
+              item.id !==
+              solicitacao.id
+          )
+      );
+
+
+      Alert.alert(
+        'Solicitação excluída',
+        'A solicitação foi excluída com sucesso.'
+      );
+
+
+    } catch (erro) {
+
+      console.log(
+        'ERRO AO EXCLUIR SOLICITAÇÃO:',
+        erro
+      );
+
+      Alert.alert(
+        'Erro',
+        'Não foi possível excluir a solicitação.'
+      );
+
+
+    } finally {
+
+      setProcessando(null);
+
+    }
+
   };
 
 
@@ -618,7 +892,9 @@ export default function SolicitacoesAnuncios({ navigation }) {
   // FORMATAR PREÇO
   // =====================================================
 
-  const formatarPreco = (preco) => {
+  const formatarPreco = (
+    preco
+  ) => {
 
     if (
       preco === undefined ||
@@ -627,11 +903,13 @@ export default function SolicitacoesAnuncios({ navigation }) {
     ) {
 
       return 'Não informado';
+
     }
 
 
     if (
-      typeof preco === 'number'
+      typeof preco ===
+      'number'
     ) {
 
       return preco.toLocaleString(
@@ -641,10 +919,12 @@ export default function SolicitacoesAnuncios({ navigation }) {
           currency: 'BRL',
         }
       );
+
     }
 
 
     return String(preco);
+
   };
 
 
@@ -657,27 +937,32 @@ export default function SolicitacoesAnuncios({ navigation }) {
   ) => {
 
     if (
-      status === 'aprovado'
+      status ===
+      'aprovado'
     ) {
 
       return 'APROVADO';
+
     }
 
 
     if (
-      status === 'recusado'
+      status ===
+      'recusado'
     ) {
 
       return 'RECUSADO';
+
     }
 
 
     return 'PENDENTE';
+
   };
 
 
   // =====================================================
-  // FILTRAGEM
+  // FILTROS
   // =====================================================
 
   const solicitacoesFiltradas =
@@ -689,14 +974,10 @@ export default function SolicitacoesAnuncios({ navigation }) {
           'pendente';
 
 
-        // FILTRO DE STATUS
-
         const atendeStatus =
           filtro === 'todos' ||
           statusItem === filtro;
 
-
-        // BUSCA
 
         const termoBusca =
           buscaProprietario
@@ -705,14 +986,14 @@ export default function SolicitacoesAnuncios({ navigation }) {
 
 
         const nomeProprietario =
-          (
+          String(
             item.proprietarioNome ||
             ''
           ).toLowerCase();
 
 
         const emailProprietario =
-          (
+          String(
             item.proprietarioEmail ||
             ''
           ).toLowerCase();
@@ -732,6 +1013,7 @@ export default function SolicitacoesAnuncios({ navigation }) {
           atendeStatus &&
           atendeBusca
         );
+
       }
     );
 
@@ -791,7 +1073,9 @@ export default function SolicitacoesAnuncios({ navigation }) {
         </View>
 
       </ImageBackground>
+
     );
+
   }
 
 
@@ -853,9 +1137,7 @@ export default function SolicitacoesAnuncios({ navigation }) {
             A2{' '}
 
             <Text
-              style={
-                estilos.logoBranco
-              }
+              style={estilos.logoBranco}
             >
               IMÓVEIS
             </Text>
@@ -883,15 +1165,11 @@ export default function SolicitacoesAnuncios({ navigation }) {
         {/* BUSCA */}
 
         <View
-          style={
-            estilos.containerBusca
-          }
+          style={estilos.containerBusca}
         >
 
           <TextInput
-            style={
-              estilos.inputBusca
-            }
+            style={estilos.inputBusca}
 
             placeholder={
               'Buscar por proprietário ou e-mail...'
@@ -1122,7 +1400,7 @@ export default function SolicitacoesAnuncios({ navigation }) {
               >
 
 
-                {/* CABEÇALHO DO CARD */}
+                {/* CABEÇALHO */}
 
                 <View
                   style={
@@ -1368,8 +1646,9 @@ export default function SolicitacoesAnuncios({ navigation }) {
                         estilos.numeroCaracteristica
                       }
                     >
-                      {solicitacao.quartos ??
-                        '-'}
+                      {solicitacao.quartos != null
+                        ? solicitacao.quartos
+                        : '-'}
                     </Text>
 
                     <Text
@@ -1402,8 +1681,9 @@ export default function SolicitacoesAnuncios({ navigation }) {
                         estilos.numeroCaracteristica
                       }
                     >
-                      {solicitacao.banheiros ??
-                        '-'}
+                      {solicitacao.banheiros != null
+                        ? solicitacao.banheiros
+                        : '-'}
                     </Text>
 
                     <Text
@@ -1436,8 +1716,9 @@ export default function SolicitacoesAnuncios({ navigation }) {
                         estilos.numeroCaracteristica
                       }
                     >
-                      {solicitacao.vagas ??
-                        '-'}
+                      {solicitacao.vagas != null
+                        ? solicitacao.vagas
+                        : '-'}
                     </Text>
 
                     <Text
@@ -1470,8 +1751,9 @@ export default function SolicitacoesAnuncios({ navigation }) {
                         estilos.numeroCaracteristica
                       }
                     >
-                      {solicitacao.area ??
-                        '-'}
+                      {solicitacao.area != null
+                        ? solicitacao.area
+                        : '-'}
                     </Text>
 
                     <Text
@@ -1772,7 +2054,9 @@ export default function SolicitacoesAnuncios({ navigation }) {
                 )}
 
 
+                {/* ================================================= */}
                 {/* BOTÕES */}
+                {/* ================================================= */}
 
                 <View
                   style={
@@ -1780,62 +2064,47 @@ export default function SolicitacoesAnuncios({ navigation }) {
                   }
                 >
 
-                  {/* DEPOIS DE DECIDIR:
-                      SOMENTE WHATSAPP */}
 
-                  {solicitacao.status ===
-                    'aprovado' ||
-                  solicitacao.status ===
-                    'recusado' ? (
+                  {/* WHATSAPP */}
 
-                    <TouchableOpacity
+                  <TouchableOpacity
+                    style={
+                      estilos.botaoContato
+                    }
+
+                    onPress={() =>
+                      entrarEmContato(
+                        solicitacao
+                      )
+                    }
+
+                    disabled={
+                      processando ===
+                      solicitacao.id
+                    }
+                  >
+
+                    <Text
                       style={
-                        estilos.botaoContato
-                      }
-
-                      onPress={() =>
-                        entrarEmContato(
-                          solicitacao
-                        )
+                        estilos.textoBotaoContato
                       }
                     >
+                      WHATSAPP
+                    </Text>
 
-                      <Text
-                        style={
-                          estilos.textoBotaoContato
-                        }
-                      >
-                        WHATSAPP
-                      </Text>
+                  </TouchableOpacity>
 
-                    </TouchableOpacity>
 
-                  ) : (
+                  {/* ================================================= */}
+                  {/* PENDENTE */}
+                  {/* ================================================= */}
+
+                  {solicitacao.status !==
+                    'aprovado' &&
+                  solicitacao.status !==
+                    'recusado' && (
 
                     <>
-
-                      <TouchableOpacity
-                        style={
-                          estilos.botaoContato
-                        }
-
-                        onPress={() =>
-                          entrarEmContato(
-                            solicitacao
-                          )
-                        }
-                      >
-
-                        <Text
-                          style={
-                            estilos.textoBotaoContato
-                          }
-                        >
-                          WHATSAPP
-                        </Text>
-
-                      </TouchableOpacity>
-
 
                       <TouchableOpacity
                         style={
@@ -1908,6 +2177,90 @@ export default function SolicitacoesAnuncios({ navigation }) {
 
                   )}
 
+
+                  {/* ================================================= */}
+                  {/* ALTERAR DECISÃO */}
+                  {/* ================================================= */}
+
+                  {(solicitacao.status ===
+                    'aprovado' ||
+                  solicitacao.status ===
+                    'recusado') && (
+
+                    <TouchableOpacity
+                      style={
+                        estilos.botaoAlterar
+                      }
+
+                      onPress={() =>
+                        alterarDecisao(
+                          solicitacao
+                        )
+                      }
+
+                      disabled={
+                        processando ===
+                        solicitacao.id
+                      }
+                    >
+
+                      <Text
+                        style={
+                          estilos.textoBotaoAlterar
+                        }
+                      >
+                        ALTERAR DECISÃO
+                      </Text>
+
+                    </TouchableOpacity>
+
+                  )}
+
+
+                  {/* ================================================= */}
+                  {/* EXCLUIR */}
+                  {/* ================================================= */}
+
+                  <TouchableOpacity
+                    style={
+                      estilos.botaoExcluir
+                    }
+
+                    onPress={() =>
+                      excluirSolicitacao(
+                        solicitacao
+                      )
+                    }
+
+                    disabled={
+                      processando ===
+                      solicitacao.id
+                    }
+                  >
+
+                    {processando ===
+                    solicitacao.id ? (
+
+                      <ActivityIndicator
+                        color="#e88a8a"
+                        size="small"
+                      />
+
+                    ) : (
+
+                      <Text
+                        style={
+                          estilos.textoBotaoExcluir
+                        }
+                      >
+                        EXCLUIR
+                      </Text>
+
+                    )}
+
+                  </TouchableOpacity>
+
+
                 </View>
 
               </View>
@@ -1920,9 +2273,15 @@ export default function SolicitacoesAnuncios({ navigation }) {
       </ScrollView>
 
     </ImageBackground>
+
   );
+
 }
 
+
+// =====================================================
+// ESTILOS
+// =====================================================
 
 const estilos = StyleSheet.create({
 
@@ -1931,15 +2290,18 @@ const estilos = StyleSheet.create({
     backgroundColor: '#111',
   },
 
+
   sombra: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor:
       'rgba(0,0,0,0.68)',
   },
 
+
   scroll: {
     flex: 1,
   },
+
 
   conteudo: {
     padding: 20,
@@ -1969,6 +2331,7 @@ const estilos = StyleSheet.create({
     zIndex: 10,
   },
 
+
   iconeVoltar: {
     color: '#C9A86A',
     fontSize: 38,
@@ -1985,6 +2348,7 @@ const estilos = StyleSheet.create({
     marginBottom: 15,
   },
 
+
   logo: {
     color: '#C9A86A',
     fontSize: 19,
@@ -1993,15 +2357,18 @@ const estilos = StyleSheet.create({
     marginBottom: 18,
   },
 
+
   logoBranco: {
     color: '#fff',
   },
+
 
   titulo: {
     color: '#fff',
     fontSize: 28,
     fontWeight: '700',
   },
+
 
   subtitulo: {
     color: '#999',
@@ -2027,6 +2394,7 @@ const estilos = StyleSheet.create({
     marginBottom: 12,
   },
 
+
   inputBusca: {
     flex: 1,
     height: 44,
@@ -2034,9 +2402,11 @@ const estilos = StyleSheet.create({
     fontSize: 13,
   },
 
+
   botaoLimparBusca: {
     padding: 5,
   },
+
 
   textoLimparBusca: {
     color: '#888',
@@ -2054,6 +2424,7 @@ const estilos = StyleSheet.create({
     marginBottom: 20,
   },
 
+
   botaoFiltro: {
     flex: 1,
     paddingVertical: 8,
@@ -2065,17 +2436,20 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
   },
 
+
   filtroAtivo: {
     borderColor: '#C9A86A',
     backgroundColor:
       'rgba(201,168,106,0.15)',
   },
 
+
   textoFiltro: {
     color: '#777',
     fontSize: 10,
     fontWeight: '700',
   },
+
 
   textoFiltroAtivo: {
     color: '#C9A86A',
@@ -2097,10 +2471,12 @@ const estilos = StyleSheet.create({
     marginBottom: 20,
   },
 
+
   cabecalhoCard: {
     flexDirection: 'row',
     alignItems: 'center',
   },
+
 
   numero: {
     width: 45,
@@ -2115,14 +2491,17 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
   },
 
+
   numeroTexto: {
     fontSize: 20,
   },
+
 
   infoCabecalho: {
     flex: 1,
     marginLeft: 12,
   },
+
 
   tituloImovel: {
     color: '#fff',
@@ -2130,11 +2509,13 @@ const estilos = StyleSheet.create({
     fontWeight: '700',
   },
 
+
   tipoImovel: {
     color: '#888',
     fontSize: 11,
     marginTop: 4,
   },
+
 
   status: {
     backgroundColor:
@@ -2147,12 +2528,14 @@ const estilos = StyleSheet.create({
     paddingVertical: 6,
   },
 
+
   statusAprovado: {
     borderColor:
       'rgba(100,180,100,0.45)',
     backgroundColor:
       'rgba(100,180,100,0.10)',
   },
+
 
   statusRecusado: {
     borderColor:
@@ -2161,19 +2544,23 @@ const estilos = StyleSheet.create({
       'rgba(200,80,80,0.10)',
   },
 
+
   textoStatus: {
     color: '#C9A86A',
     fontSize: 8,
     fontWeight: '900',
   },
 
+
   textoStatusAprovado: {
     color: '#8fd18f',
   },
 
+
   textoStatusRecusado: {
     color: '#e88a8a',
   },
+
 
   divisor: {
     height: 1,
@@ -2194,16 +2581,19 @@ const estilos = StyleSheet.create({
     marginBottom: 14,
   },
 
+
   grade: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
 
+
   infoItem: {
     width: '48%',
     marginBottom: 15,
   },
+
 
   label: {
     color: '#666',
@@ -2213,10 +2603,12 @@ const estilos = StyleSheet.create({
     marginBottom: 5,
   },
 
+
   valor: {
     color: '#ddd',
     fontSize: 13,
   },
+
 
   valorDestaque: {
     color: '#C9A86A',
@@ -2239,21 +2631,25 @@ const estilos = StyleSheet.create({
     marginTop: 5,
   },
 
+
   caracteristica: {
     alignItems: 'center',
     flex: 1,
   },
+
 
   iconeCaracteristica: {
     fontSize: 17,
     marginBottom: 5,
   },
 
+
   numeroCaracteristica: {
     color: '#fff',
     fontSize: 14,
     fontWeight: '800',
   },
+
 
   nomeCaracteristica: {
     color: '#777',
@@ -2269,6 +2665,7 @@ const estilos = StyleSheet.create({
   blocoTexto: {
     marginTop: 15,
   },
+
 
   texto: {
     color: '#bbb',
@@ -2286,6 +2683,7 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
   },
 
+
   avatar: {
     width: 44,
     height: 44,
@@ -2297,14 +2695,17 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
   },
 
+
   avatarTexto: {
     fontSize: 18,
   },
+
 
   infoProprietario: {
     marginLeft: 12,
     flex: 1,
   },
+
 
   nomeProprietario: {
     color: '#fff',
@@ -2313,10 +2714,12 @@ const estilos = StyleSheet.create({
     marginBottom: 2,
   },
 
+
   email: {
     color: '#ddd',
     fontSize: 12,
   },
+
 
   telefone: {
     color: '#777',
@@ -2341,16 +2744,19 @@ const estilos = StyleSheet.create({
     marginBottom: 10,
   },
 
+
   iconeDocumento: {
     fontSize: 22,
     width: 40,
     textAlign: 'center',
   },
 
+
   infoDocumento: {
     flex: 1,
     marginLeft: 8,
   },
+
 
   nomeDocumento: {
     color: '#fff',
@@ -2358,11 +2764,13 @@ const estilos = StyleSheet.create({
     fontWeight: '700',
   },
 
+
   subDocumento: {
     color: '#777',
     fontSize: 9,
     marginTop: 4,
   },
+
 
   seta: {
     color: '#C9A86A',
@@ -2383,9 +2791,11 @@ const estilos = StyleSheet.create({
     marginBottom: 8,
   },
 
+
   listaFotos: {
     marginBottom: 8,
   },
+
 
   foto: {
     width: 110,
@@ -2402,11 +2812,14 @@ const estilos = StyleSheet.create({
 
   botoes: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     marginTop: 8,
   },
 
+
   botaoContato: {
     flex: 1,
+    minWidth: '22%',
     height: 45,
     borderRadius: 10,
     borderWidth: 1,
@@ -2414,7 +2827,9 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 6,
+    marginBottom: 6,
   },
+
 
   textoBotaoContato: {
     color: '#ddd',
@@ -2422,8 +2837,10 @@ const estilos = StyleSheet.create({
     fontWeight: '900',
   },
 
+
   botaoRecusar: {
     flex: 1,
+    minWidth: '22%',
     height: 45,
     borderRadius: 10,
     borderWidth: 1,
@@ -2432,7 +2849,9 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 6,
+    marginBottom: 6,
   },
+
 
   textoBotaoRecusar: {
     color: '#e88a8a',
@@ -2440,17 +2859,73 @@ const estilos = StyleSheet.create({
     fontWeight: '900',
   },
 
+
   botaoAceitar: {
     flex: 1,
+    minWidth: '22%',
     height: 45,
     borderRadius: 10,
     backgroundColor: '#C9A86A',
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 6,
   },
+
 
   textoBotaoAceitar: {
     color: '#111',
+    fontSize: 9,
+    fontWeight: '900',
+  },
+
+
+  // =====================================================
+  // ALTERAR DECISÃO
+  // =====================================================
+
+  botaoAlterar: {
+    flex: 1,
+    minWidth: '22%',
+    height: 45,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor:
+      'rgba(201,168,106,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 6,
+    marginBottom: 6,
+  },
+
+
+  textoBotaoAlterar: {
+    color: '#C9A86A',
+    fontSize: 9,
+    fontWeight: '900',
+  },
+
+
+  // =====================================================
+  // EXCLUIR
+  // =====================================================
+
+  botaoExcluir: {
+    flex: 1,
+    minWidth: '22%',
+    height: 45,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor:
+      'rgba(200,80,80,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 6,
+    marginBottom: 6,
+  },
+
+
+  textoBotaoExcluir: {
+    color: '#e88a8a',
     fontSize: 9,
     fontWeight: '900',
   },
@@ -2471,16 +2946,19 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
   },
 
+
   iconeVazio: {
     fontSize: 45,
     marginBottom: 15,
   },
+
 
   tituloVazio: {
     color: '#fff',
     fontSize: 18,
     fontWeight: '700',
   },
+
 
   textoVazio: {
     color: '#777',
@@ -2499,6 +2977,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+
 
   textoCarregando: {
     color: '#aaa',
